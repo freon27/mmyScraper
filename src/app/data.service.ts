@@ -11,6 +11,6 @@ export class DataService {
   }
 
   query(url: string, queryTerm: string): Observable<string> {
-    return this.http.get(`${url}/${queryTerm}/`, { responseType: "text"})
+    return this.http.get(`${url}/${queryTerm}`, { responseType: "text"})
   }
 }

@@ -1,1 +1,24 @@
 /* You can add global styles to this file, and also import other style files */
+@import '~@angular/material/prebuilt-themes/indigo-pink.css';
+
+body {
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+th, td {
+  padding: 16px;
+  text-align: left;
+
+  &.icon-cell {
+    text-align: center;
+  }
+}
+
+
+.positive {
+  color: #42ba96;
+}
+
+.negative {
+  color: #df4759;
+}

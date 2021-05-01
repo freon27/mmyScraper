@@ -1,17 +1,75 @@
-<ng-container *ngIf="results$ | async as results">
-  <h2>mytoys</h2>
-  <ul>
-    <li *ngFor="let result of results[0]">{{ result.articleNumber }} {{ result.name }}</li>
-  </ul>
+<mat-toolbar>
+  <span>mmyScraper</span>
+</mat-toolbar>
 
-  <h2>mirapodo</h2>
-  <ul>
-    <li *ngFor="let result of  results[1]">{{ result.articleNumber }} {{ result.name }}</li>
-  </ul>
+<section>
+  <form class="search-form" [formGroup]="searchForm">
+    <mat-form-field appearance="outline">
+      <mat-label>keyword</mat-label>
+      <input matInput formControlName="search">
+    </mat-form-field>
+    <button (click)="submitSearch()" color="primary" matSuffix [disabled]="! searchForm.dirty || ! searchForm.valid"
+            mat-flat-button>go
+    </button>
+  </form>
+</section>
 
-  <h2>yomonda</h2>
-  <ul>
-    <li *ngFor="let result of  results[2]">{{ result.articleNumber }} {{ result.name }}</li>
-  </ul>
+<section>
+  <mat-tab-group *ngIf="(dataLoaded$ | async)" [class.loadingmask]="dataLoading$ | async">
 
-</ng-container>
+    <mat-tab label="all">
+      <ng-container *ngIf="resultsAll$ | async as resultsAll">
+        <table>
+          <tr>
+            <th>article no.
+              <button (click)="copyAllArticleNumbers()" mat-icon-button>
+                <mat-icon>content_copy</mat-icon>
+              </button>
+            </th>
+            <th *ngFor="let app of appNames$ | async">{{ app }}</th>
+          </tr>
+          <tr *ngFor="let articleNumber of allArticleNumber$ | async ">
+            <td>{{ articleNumber }}</td>
+            <td class="icon-cell" *ngFor="let app of appNames$ | async">
+              <!-- FIXME: ugly ugly ugly-->
+              <a target="_blank" [href]="'https://' + app + '.de/xxx-' + articleNumber + '.html'">
+                <mat-icon class="positive" *ngIf="resultsAll[articleNumber][app]">check</mat-icon>
+              </a>
+              <mat-icon class="negative" *ngIf="! resultsAll[articleNumber][app]">close</mat-icon>
+            </td>
+          </tr>
+        </table>
+      </ng-container>
+
+    </mat-tab>
+
+    <mat-tab label="per-site">
+      <ng-container *ngFor="let app of appNames$ | async">
+
+        <ng-container *ngIf="results$ | async as results">
+          <h2>{{ app }}
+            <button (click)="copyArticleNumbers(app)" mat-icon-button>
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </h2>
+          <table>
+            <tr>
+              <th>article no.</th>
+              <th>text</th>
+            </tr>
+            <tr *ngFor="let result of results[app]">
+              <td>{{ result.articleNumber }}</td>
+              <td>{{ result.name }}</td>
+            </tr>
+          </table>
+        </ng-container>
+      </ng-container>
+
+
+    </mat-tab>
+
+  </mat-tab-group>
+</section>
+
+<mat-spinner *ngIf="dataLoading$ | async"></mat-spinner>
+

@@ -1,0 +1,25 @@
+.search-form {
+  display: flex;
+  align-items: flex-start;
+}
+
+.search-form button {
+  height: 60px;
+  margin-top: 4px;
+  margin-left: 8px;
+}
+
+section {
+  padding-top: 24px;
+}
+
+mat-spinner {
+  position: fixed;
+  top: 33%;
+  left: 50%;
+  transform: translateX(-100%);
+}
+
+.loadingmask {
+  opacity: 0.5;
+}
