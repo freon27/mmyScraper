@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {DataService} from "./data.service";
-import {map, tap} from "rxjs/operators";
-import {BehaviorSubject, forkJoin, Observable} from "rxjs";
+import {concatAll, concatMap, delay, expand, map, mergeAll, mergeMap, tap, toArray} from "rxjs/operators";
+import {BehaviorSubject, EMPTY, forkJoin, Observable, Subject} from "rxjs";
 
 export interface Config {
   url: string;
@@ -60,15 +60,16 @@ const linkParser = (doc: Document) => {
 export class ScraperService {
 
   config: Config[] = [
-    { url: 'https://www.mytoys.de/suche', parserFunction: spanParser, appName: 'mytoys' },
-    { url: 'https://www.mirapodo.de/suche/', parserFunction: spanParser, appName: 'mirapodo' },
-    { url: 'https://www.yomonda.de/suche', parserFunction: linkParser, appName: 'yomonda' }
+    {url: 'https://www.mytoys.de/suche', parserFunction: spanParser, appName: 'mytoys'},
+    {url: 'https://www.mirapodo.de/suche/', parserFunction: spanParser, appName: 'mirapodo'},
+    {url: 'https://www.yomonda.de/suche', parserFunction: linkParser, appName: 'yomonda'}
   ]
 
-  results$ = new BehaviorSubject<{ [key: string]: Result[]}>({});
+  results$ = new BehaviorSubject<{ [key: string]: Result[] }>({});
   resultsAll$: Observable<{ [articleNumber: string]: OnApp }>;
   dataLoaded$ = new BehaviorSubject<boolean>(false);
   dataLoading$ = new BehaviorSubject<boolean>(false);
+  captchaError$ = new Subject<string>();
 
   constructor(private dataService: DataService) {
     this.resultsAll$ = this.results$.pipe(
@@ -77,11 +78,11 @@ export class ScraperService {
           results[appName].forEach(article => {
             object[article.articleNumber] =
               object[article.articleNumber] || {};
-              object[article.articleNumber][appName] = true;
+            object[article.articleNumber][appName] = true;
           });
 
           return object;
-        }, {} as { [articleNumber: string]: OnApp});
+        }, {} as { [articleNumber: string]: OnApp });
       })
     )
   }
@@ -90,24 +91,52 @@ export class ScraperService {
     this.dataLoading$.next(true);
 
     forkJoin(this.config.reduce((acc, config) => {
-        return {...acc, [config.appName]: this.scrapeWebsite(searchTerm, config) }
-      }, {}) )
+      return {...acc, [config.appName]: this.scrapeWebsite(searchTerm, config)}
+    }, {}))
       .pipe(tap(() => {
         this.dataLoaded$.next(true);
         this.dataLoading$.next(false)
       }))
-        .subscribe(result => this.results$.next(result));
+      .subscribe(result => this.results$.next(result));
   }
 
-  scrapeWebsite(searchTerm: string, config: Config) {
-    return this.dataService.query(config.url, searchTerm)
+  scrapeWebsite(searchTerm: string, config: Config): Observable<Result[]> {
+
+    let pageNumber = 1;
+
+    return this.getSearchPage(searchTerm, config, pageNumber)
+      .pipe(
+        expand((results) => {
+
+          if (results.length) {
+            pageNumber = pageNumber + 1;
+            return this.getSearchPage(searchTerm, config, pageNumber).pipe(delay(3000));
+          } else {
+            return EMPTY;
+          }
+        }),
+        toArray(),
+        map(results => results.reduce((array, result) => {
+          return array.concat(result);
+        }, [])),
+      )
+  }
+
+  getSearchPage(searchTerm: string, config: Config, page?: number): Observable<Result[]> {
+
+
+    return this.dataService.query(config.url, searchTerm, page)
       .pipe(
         map((text) => {
+
           const domParser = new DOMParser();
           return domParser.parseFromString(text, 'text/html');
         }),
-        map(config.parserFunction),
-        map(result => result.sort((a, b) =>  a.articleNumber > b.articleNumber ? 1 : a.articleNumber < b.articleNumber ? -1 : 0 ))
-      );
+        tap(parser => {
+          if (parser.querySelector('.g-recaptcha') !== null) {
+            this.captchaError$.next(config.appName);
+          }
+        }),
+        map(config.parserFunction))
   }
 }

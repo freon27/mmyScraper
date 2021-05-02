@@ -19,6 +19,9 @@
 
     <mat-tab label="all">
       <ng-container *ngIf="resultsAll$ | async as resultsAll">
+
+        <p class="results">showing {{ (allArticleNumber$ | async).length }} results</p>
+
         <table>
           <tr>
             <th>article no.
@@ -52,14 +55,17 @@
               <mat-icon>content_copy</mat-icon>
             </button>
           </h2>
+
+          <p class="results">showing {{ results[app].length }} results</p>
+
           <table>
             <tr>
               <th>article no.</th>
               <th>text</th>
             </tr>
             <tr *ngFor="let result of results[app]">
-              <td>{{ result.articleNumber }}</td>
-              <td>{{ result.name }}</td>
+              <td >{{ result.articleNumber }}</td>
+              <td class="secondary">{{ result.name }}</td>
             </tr>
           </table>
         </ng-container>

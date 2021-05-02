@@ -10,7 +10,9 @@ export class DataService {
   constructor(private http: HttpClient) {
   }
 
-  query(url: string, queryTerm: string): Observable<string> {
-    return this.http.get(`${url}/${queryTerm}`, { responseType: "text"})
+  query(url: string, queryTerm: string, page?: number): Observable<string> {
+    const baseQuery = `${url}/${queryTerm}`;
+    const searchQuery = page !== null ? `${baseQuery}?sort=scoring&page=${page}` : baseQuery;
+    return this.http.get(searchQuery, { responseType: "text"})
   }
 }

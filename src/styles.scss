@@ -9,6 +9,10 @@ th, td {
   padding: 16px;
   text-align: left;
 
+  &:first-child {
+    padding-left: 0;
+  }
+
   &.icon-cell {
     text-align: center;
   }
@@ -21,4 +25,8 @@ th, td {
 
 .negative {
   color: #df4759;
+}
+
+.secondary {
+  color: #869ab8;
 }

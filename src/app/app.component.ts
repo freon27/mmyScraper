@@ -32,6 +32,8 @@ export class AppComponent {
     this.dataLoaded$ = this.scraperService.dataLoaded$;
     this.dataLoading$ = this.scraperService.dataLoading$;
 
+    this.scraperService.captchaError$.subscribe((appName) => this.snackbarService.open(`ERROR: Captcha required for ${appName}`, 'close'))
+
     // this.searchForm.valueChanges.subscribe((term) => {
     //   this.scraperService.scrapeKeyword(
     //     term
