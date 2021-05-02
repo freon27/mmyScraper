@@ -60,9 +60,9 @@ const linkParser = (doc: Document) => {
 export class ScraperService {
 
   config: Config[] = [
-    {url: 'https://www.mytoys.de/suche', parserFunction: spanParser, appName: 'mytoys'},
-    {url: 'https://www.mirapodo.de/suche/', parserFunction: spanParser, appName: 'mirapodo'},
-    {url: 'https://www.yomonda.de/suche', parserFunction: linkParser, appName: 'yomonda'}
+    {url: 'https://thingproxy.freeboard.io/fetch/https://www.mytoys.de/suche', parserFunction: spanParser, appName: 'mytoys'},
+    {url: 'https://thingproxy.freeboard.io/fetch/https://www.mirapodo.de/suche/', parserFunction: spanParser, appName: 'mirapodo'},
+    {url: 'https://thingproxy.freeboard.io/fetch/https://www.yomonda.de/suche', parserFunction: linkParser, appName: 'yomonda'}
   ]
 
   results$ = new BehaviorSubject<{ [key: string]: Result[] }>({});

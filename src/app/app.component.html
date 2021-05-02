@@ -20,7 +20,7 @@
     <mat-tab label="all">
       <ng-container *ngIf="resultsAll$ | async as resultsAll">
 
-        <p class="results">showing {{ (allArticleNumber$ | async).length }} results</p>
+        <p class="results">showing {{ (allArticleNumber$ | async)?.length }} results</p>
 
         <table>
           <tr>
